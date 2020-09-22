@@ -116,6 +116,7 @@ function getDefaultRenderOptions(options, schemaName, jsonSchema) {
  * @typedef Options
  * @type {object}
  * @property {Parameters} parameters - 
+ * @property {string} generatorTargetDir - 
  * @property {SupportedLanguages} quicktypeLanguage - 
  * @property {string} fileExtension - 
  * @property {string} targetDir - 
@@ -227,7 +228,7 @@ function getOptions(
   }
   
   if (parameters.subTargetDir) {
-    options.targetDir = Path.join(generatorTargetDir, parameters.subTargetDir);
+    options.targetDir = parameters.subTargetDir;
   }
 
   // Unwrap render options
