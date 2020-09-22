@@ -1,5 +1,5 @@
 {
-  "name": "@jonaslagoni/asyncapi-quicktype-filter",
+  "name": "@lagoni/asyncapi-quicktype-filter",
   "version": "0.1.1",
   "description": "Library with qucktype filters for templates using AsyncAPI Generator",
   "main": "src/index.js",
