@@ -40,8 +40,9 @@
     "semantic-release": "^17.0.4"
   },
   "dependencies": {
-    "quicktype-core": "6.0.66",
-    "lodash": "^4.17.15"
+    "is-url": "^1.2.4",
+    "lodash": "^4.17.15",
+    "quicktype-core": "6.0.66"
   },
   "release": {
     "branches": [
