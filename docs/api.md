@@ -1,9 +1,6 @@
 ## Functions
 
 <dl>
-<dt><a href="#quicktypeSchema">quicktypeSchema(schemaPath, schemaName, jsonSchema)</a></dt>
-<dd><p>Generate a typescript structure from a schema.</p>
-</dd>
 <dt><a href="#generateAllMessagePayloads">generateAllMessagePayloads(generatorTargetDir, parameters, messages)</a></dt>
 <dd></dd>
 </dl>
@@ -47,19 +44,6 @@ Enum for supported languages by this filter
 | swift | [<code>SupportedLanguages</code>](#SupportedLanguages) | <code>swift</code> | 
 | typescript | [<code>SupportedLanguages</code>](#SupportedLanguages) | <code>typescript</code> | 
 
-<a name="quicktypeSchema"></a>
-
-## quicktypeSchema(schemaPath, schemaName, jsonSchema)
-Generate a typescript structure from a schema.
-
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| schemaPath | <code>String</code> | Path to the folder to store the generated files |
-| schemaName | <code>\*</code> | The name of the schema to generate |
-| jsonSchema | <code>\*</code> | The schema to generate |
-
 <a name="generateAllMessagePayloads"></a>
 
 ## generateAllMessagePayloads(generatorTargetDir, parameters, messages)
@@ -84,6 +68,6 @@ Generate a typescript structure from a schema.
 | Name | Type | Description |
 | --- | --- | --- |
 | subTargetDir | <code>string</code> | which relative target sub directory should it be rendered to. It is relative to where the generators targetDir |
-| rendererOptions | <code>string</code> | Provide a JSON object as a string which should be parsed to quicktype. |
+| renderOptions | <code>string</code> | Provide a JSON object as a string which should be parsed to quicktype. |
 | quicktypeLanguage | [<code>SupportedLanguages</code>](#SupportedLanguages) | Which type of quicktype language should be generated. |
 

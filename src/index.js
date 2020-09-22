@@ -46,28 +46,32 @@ const SUPPORTED_LANGUAGES = {
 /**
  * Generate a typescript structure from a schema.
  *
- * @param {String} schemaPath Path to the folder to store the generated files
- * @param {*} schemaName The name of the schema to generate
+ * @private
+ * @param {Options} options Path to the folder to store the generated files
+ * @param {string} schemaName The name of the schema to generate
  * @param {*} jsonSchema The schema to generate
  */
 async function quicktypeSchema(options, schemaName, jsonSchema) {
   const schemaString = JSON.stringify(jsonSchema.json());
+  const renderOptions = getDefaultRenderOptions(options, schemaName, jsonSchema);
+  console.log(`Rendering schema ${schemaName} with render options ${JSON.stringify(renderOptions, null, 4)}`);
   const schemaInput = new JSONSchemaInput(new JSONSchemaStore());
   await schemaInput.addSource({ name: schemaName, schema: schemaString });
   const inputData = new InputData();
   inputData.addInput(schemaInput);
   const { lines } = await quicktype({
     lang: options.quicktypeLanguage,
-    rendererOptions: options.rendererOptions,
+    rendererOptions: renderOptions,
     inputData,
   });
+  const targetDir = Path.join(options.generatorTargetDir, options.targetDir);
   await fs.promises
-    .mkdir(options.targetDir, { recursive: true })
+    .mkdir(targetDir, { recursive: true })
     .catch(console.error);
-  fs.mkdirSync(options.targetDir, { recursive: true });
+  fs.mkdirSync(targetDir, { recursive: true });
   fs.writeFileSync(
     Path.join(
-      options.targetDir,
+      targetDir,
       `${pascalCase(schemaName)}.${options.fileExtension}`
     ),
     lines.join('\n')
@@ -75,36 +79,68 @@ async function quicktypeSchema(options, schemaName, jsonSchema) {
 }
 
 /**
- * @typedef Parameters
+ * Some renderings require custom render parameters to work, get them there.
+ *
+ * @private
+ * @param {Options} options Path to the folder to store the generated files
+ * @param {string} schemaName The name of the schema to generate
+ * @param {*} jsonSchema The schema to generate
+ * @returns {object} render options
+ */
+function getDefaultRenderOptions(options, schemaName, jsonSchema) {
+  const renderOptions = {... options.renderOptions};
+  // eslint-disable-next-line sonarjs/no-small-switch
+  switch (options.quicktypeLanguage) {
+  case SUPPORTED_LANGUAGES.csharp:
+    //Each schema require custom namespace and not common since otherwise schema names will clash.
+    if (!renderOptions.namespace) {
+      renderOptions.namespace = `${pascalCase(schemaName)}NameSpace`;
+    }
+    break;
+  case SUPPORTED_LANGUAGES.java:
+    //Each schema require custom namespace and not common since otherwise schema names will clash.
+    if (!renderOptions.packageName) {
+      if (options.parameters.subTargetDir) {
+        renderOptions.package = options.parameters.subTargetDir.replace(/\//g, '.').replace('src.main.java.', '');
+      } else {
+        renderOptions.package = options.targetDir.replace(/\//g, '.').replace('src.main.java.', '');
+      }
+    }
+    break;
+  }
+  return renderOptions;
+}
+
+/**
+ * @private
+ * @typedef Options
  * @type {object}
- * @property {string} subTargetDir - which relative target sub directory should it be rendered to. It is relative to where the generators targetDir
- * @property {string} rendererOptions - Provide a JSON object as a string which should be parsed to quicktype.
- * @property {SupportedLanguages} quicktypeLanguage - Which type of quicktype language should be generated.
+ * @property {Parameters} parameters - 
+ * @property {SupportedLanguages} quicktypeLanguage - 
+ * @property {string} fileExtension - 
+ * @property {string} targetDir - 
+ * @property {*} renderOptions - 
  */
 
 /**
+ * parse the parameters from the template and return the options to use for rendering
+ * @private
  * @param {string} generatorTargetDir
  * @param {Parameters} parameters
- * @param {*} messages
+ * @returns {Options} options to use
  */
-async function generateAllMessagePayloads(
+function getOptions(
   generatorTargetDir,
-  parameters,
-  messages
-) {
+  parameters) {
   // Parse generator parameters
   const options = {
+    parameters,
     quicktypeLanguage: null,
     fileExtension: null,
-    targetDir: Path.join(generatorTargetDir, './'),
-    rendererOptions: {},
+    generatorTargetDir,
+    targetDir: '',
+    renderOptions: {},
   };
-  if (parameters.subTargetDir) {
-    options.targetDir = Path.join(generatorTargetDir, parameters.subTargetDir);
-  }
-  if (parameters.rendererOptions) {
-    options.rendererOptions = JSON.parse(parameters.rendererOptions);
-  }
   if (parameters.quicktypeLanguage) {
     switch (parameters.quicktypeLanguage) {
     case SUPPORTED_LANGUAGES.cplusplus:
@@ -137,6 +173,7 @@ async function generateAllMessagePayloads(
       break;
     case SUPPORTED_LANGUAGES.java:
       options.quicktypeLanguage = SUPPORTED_LANGUAGES.java;
+      options.targetDir = 'src/main/java/io/quicktype';
       options.fileExtension = 'java';
       break;
     case SUPPORTED_LANGUAGES.jsonschema:
@@ -188,9 +225,48 @@ async function generateAllMessagePayloads(
       `Parameter ${parameters.quicktypeLanguage} are not provided in the generator.`
     );
   }
+  
+  if (parameters.subTargetDir) {
+    options.targetDir = Path.join(generatorTargetDir, parameters.subTargetDir);
+  }
+
+  // Unwrap render options
+  if (parameters.renderOptions) {
+    const renderOptionsToUse = JSON.parse(parameters.renderOptions);
+    options.parameters.renderOptions = renderOptionsToUse;
+    for (const optionKey in renderOptionsToUse) {
+      if (renderOptionsToUse.hasOwnProperty(optionKey)) {
+        const option = renderOptionsToUse[optionKey];
+        options.renderOptions[optionKey] = option;
+      }
+    }
+  }
+  return options;
+}
+
+/**
+ * @typedef Parameters
+ * @type {object}
+ * @property {string} subTargetDir - which relative target sub directory should it be rendered to. It is relative to where the generators targetDir
+ * @property {string} renderOptions - Provide a JSON object as a string which should be parsed to quicktype.
+ * @property {SupportedLanguages} quicktypeLanguage - Which type of quicktype language should be generated.
+ */
+
+/**
+ * @param {string} generatorTargetDir
+ * @param {Parameters} parameters
+ * @param {*} messages
+ */
+async function generateAllMessagePayloads(
+  generatorTargetDir,
+  parameters,
+  messages
+) {
+  const options = getOptions(generatorTargetDir, parameters);
+  console.log(`Generating files with options ${JSON.stringify(options, null, 4)}`);
+  
   for (const [messageId, message] of messages) {
     const payloadSchema = message.payload();
-    console.log(JSON.stringify(payloadSchema, null, 4));
     //Null payload is not supported by quicktype, and cannot be generated.
     if (`${payloadSchema.type()}` !== 'null') {
       await quicktypeSchema(options, messageId, payloadSchema);
