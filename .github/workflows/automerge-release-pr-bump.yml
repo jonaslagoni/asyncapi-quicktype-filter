@@ -25,7 +25,7 @@ jobs:
     steps:
       - name: Autoapproving
         uses: hmarr/auto-approve-action@v2.0.0
-        if: github.actor == 'autobot'
+        if: github.actor == 'jonaslagoni'
         with:
           github-token: "${{ secrets.GH_TOKEN }}"
 
@@ -35,10 +35,9 @@ jobs:
     steps:
       - name: Automerging
         uses: pascalgn/automerge-action@v0.7.5
-        if: github.actor == 'autobot'
+        if: github.actor == 'jonaslagoni'
         env:
           GITHUB_TOKEN: "${{ secrets.GH_TOKEN }}"
-          GITHUB_LOGIN: asyncapi-bot
           MERGE_LABELS: ""
           MERGE_METHOD: "squash"
           MERGE_COMMIT_MESSAGE: "pull-request-title"
