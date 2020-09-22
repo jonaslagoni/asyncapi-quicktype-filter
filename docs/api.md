@@ -85,5 +85,5 @@ Generate a typescript structure from a schema.
 | --- | --- | --- |
 | subTargetDir | <code>string</code> | which relative target sub directory should it be rendered to. It is relative to where the generators targetDir |
 | rendererOptions | <code>string</code> | Provide a JSON object as a string which should be parsed to quicktype. |
-| quicktypeLanguage | [<code>SupportedLanguages</code>](#SupportedLanguages) | Which type of language should be generated. |
+| quicktypeLanguage | [<code>SupportedLanguages</code>](#SupportedLanguages) | Which type of quicktype language should be generated. |
 

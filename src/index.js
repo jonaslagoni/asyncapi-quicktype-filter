@@ -12,6 +12,7 @@ function pascalCase(string) {
   string = _.camelCase(string);
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
+
 /**
  * @typedef {string} SupportedLanguages
  **/
@@ -57,7 +58,7 @@ async function quicktypeSchema(options, schemaName, jsonSchema) {
   inputData.addInput(schemaInput);
   const { lines } = await quicktype({
     lang: options.quicktypeLanguage,
-    rendererOptions: options.render,
+    rendererOptions: options.rendererOptions,
     inputData,
   });
   await fs.promises
@@ -67,9 +68,7 @@ async function quicktypeSchema(options, schemaName, jsonSchema) {
   fs.writeFileSync(
     Path.join(
       options.targetDir,
-      pascalCase(schemaName),
-      '.',
-      options.fileExtension
+      `${pascalCase(schemaName)}.${options.fileExtension}`
     ),
     lines.join('\n')
   );
@@ -80,15 +79,19 @@ async function quicktypeSchema(options, schemaName, jsonSchema) {
  * @type {object}
  * @property {string} subTargetDir - which relative target sub directory should it be rendered to. It is relative to where the generators targetDir
  * @property {string} rendererOptions - Provide a JSON object as a string which should be parsed to quicktype.
- * @property {SupportedLanguages} quicktypeLanguage - Which type of language should be generated.
+ * @property {SupportedLanguages} quicktypeLanguage - Which type of quicktype language should be generated.
  */
 
 /**
  * @param {string} generatorTargetDir
- * @param {Parameters} parameters 
- * @param {*} messages 
+ * @param {Parameters} parameters
+ * @param {*} messages
  */
-async function generateAllMessagePayloads(generatorTargetDir, parameters, messages) {
+async function generateAllMessagePayloads(
+  generatorTargetDir,
+  parameters,
+  messages
+) {
   // Parse generator parameters
   const options = {
     quicktypeLanguage: null,
@@ -97,10 +100,7 @@ async function generateAllMessagePayloads(generatorTargetDir, parameters, messag
     rendererOptions: {},
   };
   if (parameters.subTargetDir) {
-    options.targetDir = Path.join(
-      generatorTargetDir,
-      parameters.subTargetDir
-    );
+    options.targetDir = Path.join(generatorTargetDir, parameters.subTargetDir);
   }
   if (parameters.rendererOptions) {
     options.rendererOptions = JSON.parse(parameters.rendererOptions);
@@ -108,75 +108,75 @@ async function generateAllMessagePayloads(generatorTargetDir, parameters, messag
   if (parameters.quicktypeLanguage) {
     switch (parameters.quicktypeLanguage) {
     case SUPPORTED_LANGUAGES.cplusplus:
-      options.language = SUPPORTED_LANGUAGES.cplusplus;
+      options.quicktypeLanguage = SUPPORTED_LANGUAGES.cplusplus;
       options.fileExtension = 'cpp';
       break;
     case SUPPORTED_LANGUAGES.csharp:
-      options.language = SUPPORTED_LANGUAGES.csharp;
+      options.quicktypeLanguage = SUPPORTED_LANGUAGES.csharp;
       options.fileExtension = 'cs';
       break;
     case SUPPORTED_LANGUAGES.crystal:
-      options.language = SUPPORTED_LANGUAGES.crystal;
+      options.quicktypeLanguage = SUPPORTED_LANGUAGES.crystal;
       options.fileExtension = 'cr';
       break;
     case SUPPORTED_LANGUAGES.dart:
-      options.language = SUPPORTED_LANGUAGES.dart;
+      options.quicktypeLanguage = SUPPORTED_LANGUAGES.dart;
       options.fileExtension = 'dart';
       break;
     case SUPPORTED_LANGUAGES.elm:
-      options.language = SUPPORTED_LANGUAGES.elm;
+      options.quicktypeLanguage = SUPPORTED_LANGUAGES.elm;
       options.fileExtension = 'elm';
       break;
     case SUPPORTED_LANGUAGES.golang:
-      options.language = SUPPORTED_LANGUAGES.golang;
+      options.quicktypeLanguage = SUPPORTED_LANGUAGES.golang;
       options.fileExtension = 'go';
       break;
     case SUPPORTED_LANGUAGES.haskell:
-      options.language = SUPPORTED_LANGUAGES.haskell;
+      options.quicktypeLanguage = SUPPORTED_LANGUAGES.haskell;
       options.fileExtension = 'hs';
       break;
     case SUPPORTED_LANGUAGES.java:
-      options.language = SUPPORTED_LANGUAGES.java;
+      options.quicktypeLanguage = SUPPORTED_LANGUAGES.java;
       options.fileExtension = 'java';
       break;
     case SUPPORTED_LANGUAGES.jsonschema:
-      options.language = SUPPORTED_LANGUAGES.jsonschema;
+      options.quicktypeLanguage = SUPPORTED_LANGUAGES.jsonschema;
       options.fileExtension = 'json';
       break;
     case SUPPORTED_LANGUAGES.javascript:
-      options.language = SUPPORTED_LANGUAGES.javascript;
+      options.quicktypeLanguage = SUPPORTED_LANGUAGES.javascript;
       options.fileExtension = 'js';
       break;
     case SUPPORTED_LANGUAGES.javascriptproptypes:
-      options.language = SUPPORTED_LANGUAGES.javascriptproptypes;
+      options.quicktypeLanguage = SUPPORTED_LANGUAGES.javascriptproptypes;
       options.fileExtension = 'js';
       break;
     case SUPPORTED_LANGUAGES.kotlin:
-      options.language = SUPPORTED_LANGUAGES.kotlin;
+      options.quicktypeLanguage = SUPPORTED_LANGUAGES.kotlin;
       options.fileExtension = 'kt';
       break;
     case SUPPORTED_LANGUAGES.pike:
-      options.language = SUPPORTED_LANGUAGES.pike;
+      options.quicktypeLanguage = SUPPORTED_LANGUAGES.pike;
       options.fileExtension = 'pike';
       break;
     case SUPPORTED_LANGUAGES.python:
-      options.language = SUPPORTED_LANGUAGES.python;
+      options.quicktypeLanguage = SUPPORTED_LANGUAGES.python;
       options.fileExtension = 'py';
       break;
     case SUPPORTED_LANGUAGES.rust:
-      options.language = SUPPORTED_LANGUAGES.rust;
+      options.quicktypeLanguage = SUPPORTED_LANGUAGES.rust;
       options.fileExtension = 'rs';
       break;
     case SUPPORTED_LANGUAGES.ruby:
-      options.language = SUPPORTED_LANGUAGES.ruby;
+      options.quicktypeLanguage = SUPPORTED_LANGUAGES.ruby;
       options.fileExtension = 'rb';
       break;
     case SUPPORTED_LANGUAGES.swift:
-      options.language = SUPPORTED_LANGUAGES.swift;
+      options.quicktypeLanguage = SUPPORTED_LANGUAGES.swift;
       options.fileExtension = 'swift';
       break;
     case SUPPORTED_LANGUAGES.typescript:
-      options.language = SUPPORTED_LANGUAGES.typescript;
+      options.quicktypeLanguage = SUPPORTED_LANGUAGES.typescript;
       options.fileExtension = 'ts';
       break;
     default:
@@ -184,13 +184,16 @@ async function generateAllMessagePayloads(generatorTargetDir, parameters, messag
       break;
     }
   } else {
-    throw new Error(`Parameter ${parameters.quicktypeLanguage} are not provided in the generator.`);
+    throw new Error(
+      `Parameter ${parameters.quicktypeLanguage} are not provided in the generator.`
+    );
   }
   for (const [messageId, message] of messages) {
     const payloadSchema = message.payload();
+    console.log(JSON.stringify(payloadSchema, null, 4));
     //Null payload is not supported by quicktype, and cannot be generated.
     if (`${payloadSchema.type()}` !== 'null') {
-      await quicktypeSchema(options, messageId, message.payload());
+      await quicktypeSchema(options, messageId, payloadSchema);
     }
   }
 }
