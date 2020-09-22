@@ -1,6 +1,6 @@
 {
   "name": "@jonaslagoni/asyncapi-quicktype-filter",
-  "version": "1.1.0",
+  "version": "0.1.0",
   "description": "Library with qucktype filters for templates using AsyncAPI Generator",
   "main": "src/index.js",
   "scripts": {
@@ -19,7 +19,7 @@
     "generator",
     "nunjucks"
   ],
-  "author": "Lukasz Gornicki <lpgornicki@gmail.com>",
+  "author": "Jonas Lagoni <jonas-lt@live.dk>",
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/jonaslagoni/asyncapi-quicktype-filter/issues"
@@ -41,8 +41,8 @@
     "semantic-release": "^17.0.4"
   },
   "dependencies": {
-		"quicktype-core": "6.0.66",
-		"lodash": "^4.17.15"
+    "quicktype-core": "6.0.66",
+    "lodash": "^4.17.15"
   },
   "release": {
     "branches": [
