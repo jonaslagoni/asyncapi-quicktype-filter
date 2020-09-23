@@ -112,28 +112,29 @@ function getDefaultRenderOptions(options, schemaName, jsonSchema) {
 }
 
 /**
+ * Options are used for internal function.
+ * 
  * @private
  * @typedef Options
  * @type {object}
- * @property {Parameters} parameters - 
- * @property {string} generatorTargetDir - 
- * @property {SupportedLanguages} quicktypeLanguage - 
- * @property {string} fileExtension - 
- * @property {string} targetDir - 
- * @property {*} renderOptions - 
+ * @property {Parameters} parameters - Parameters provided to the public methods.
+ * @property {string} generatorTargetDir - The target directory the generator are provided.
+ * @property {SupportedLanguages} quicktypeLanguage - the language to generate.
+ * @property {string} fileExtension - File extension the language should use for the files.
+ * @property {string} targetDir - The partial target directory within the generatorTargetDir.
+ * @property {*} renderOptions - Options that should be provided to the Quicktype render engine.
  */
 
 /**
  * parse the parameters from the template and return the options to use for rendering
  * @private
- * @param {string} generatorTargetDir
- * @param {Parameters} parameters
+ * @param {string} generatorTargetDir - The target directory the generator are provided.
+ * @param {Parameters} parameters - Parameters provided to the public methods.
  * @returns {Options} options to use
  */
 function getOptions(
   generatorTargetDir,
   parameters) {
-  // Parse generator parameters
   const options = {
     parameters,
     quicktypeLanguage: null,
@@ -142,6 +143,7 @@ function getOptions(
     targetDir: '',
     renderOptions: {},
   };
+  // Parse generator parameters
   if (parameters.quicktypeLanguage) {
     switch (parameters.quicktypeLanguage) {
     case SUPPORTED_LANGUAGES.cplusplus:
@@ -254,9 +256,9 @@ function getOptions(
  */
 
 /**
- * @param {string} generatorTargetDir
- * @param {Parameters} parameters
- * @param {*} messages
+ * @param {string} generatorTargetDir - The target directory the generator are provided.
+ * @param {Parameters} parameters - Parameters provided to the public methods.
+ * @param {*} messages - AsyncAPI messages provided by the AsyncAPI parser.
  */
 async function generateAllMessagePayloads(
   generatorTargetDir,
