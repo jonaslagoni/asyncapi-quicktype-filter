@@ -233,48 +233,99 @@ function getOptions(
     options.targetDir = parameters.subTargetDir;
   }
 
-  // Unwrap render options
   if (parameters.renderOptions) {
-    const renderOptionsToUse = JSON.parse(parameters.renderOptions);
-    options.parameters.renderOptions = renderOptionsToUse;
-    for (const optionKey in renderOptionsToUse) {
-      if (renderOptionsToUse.hasOwnProperty(optionKey)) {
-        const option = renderOptionsToUse[optionKey];
-        options.renderOptions[optionKey] = option;
-      }
-    }
+    options.parameters.renderOptions = parameters.renderOptions;
   }
   return options;
 }
 
 /**
+ * Parameters passed to this library. They are converted to QuickType options in the end.
+ * 
  * @typedef Parameters
  * @type {object}
  * @property {string} subTargetDir - which relative target sub directory should it be rendered to. It is relative to where the generators targetDir
- * @property {string} renderOptions - Provide a JSON object as a string which should be parsed to quicktype.
+ * @property {Object} renderOptions - Render options passed to the quicktype library. Checkout QuickType library for more information about what is available.
  * @property {SupportedLanguages} quicktypeLanguage - Which type of quicktype language should be generated.
  */
 
 /**
+ * Generate types for multiple messages
+ * 
  * @param {string} generatorTargetDir - The target directory the generator are provided.
  * @param {Parameters} parameters - Parameters provided to the public methods.
  * @param {*} messages - AsyncAPI messages provided by the AsyncAPI parser.
  */
-async function generateAllMessagePayloads(
+async function generateTypesForAllMessagePayloads(
   generatorTargetDir,
   parameters,
   messages
 ) {
   const options = getOptions(generatorTargetDir, parameters);
-  console.log(`Generating files with options ${JSON.stringify(options, null, 4)}`);
   
   for (const [messageId, message] of messages) {
     const payloadSchema = message.payload();
-    //Null payload is not supported by quicktype, and cannot be generated.
-    if (`${payloadSchema.type()}` !== 'null') {
-      await quicktypeSchema(options, messageId, payloadSchema);
-    }
+      
+    await generateWithOptions(
+      options,
+      payloadSchema,
+      messageId);
   }
 }
 
-module.exports = { generateAllMessagePayloads };
+/**
+ * Generate types for specific schema
+ * 
+ * @param {string} generatorTargetDir - The target directory the generator are provided.
+ * @param {Parameters} parameters - Parameters provided to the public methods.
+ * @param {*} schema to generate for
+ * @param {string} schemaName to generate
+ */
+async function generateTypesForSchema(
+  generatorTargetDir,
+  parameters,
+  schema,
+  schemaName
+) {
+  await generate(
+    generatorTargetDir,
+    parameters,
+    schema,
+    schemaName);
+}
+
+/**
+ * Generate types for schema with options
+ * 
+ * @param {Options} options used to generate types
+ * @param {*} schema to generate
+ * @param {string} schemaName to generate
+ */
+async function generateWithOptions(
+  options,
+  schema,
+  schemaName) {
+  if (schema !== undefined && `${schema.type()}` !== 'null') {
+    await quicktypeSchema(options, schemaName, schema);
+  }
+}
+
+/**
+ * 
+ * Generate types for schema 
+ * 
+ * @param {string} generatorTargetDir - The target directory the generator are provided.
+ * @param {Parameters} parameters - Parameters provided to the public methods.
+ * @param {*} schema to generate
+ * @param {string} schemaName to generate
+ */
+async function generate(
+  generatorTargetDir,
+  parameters,
+  schema,
+  schemaName) {
+  const options = getOptions(generatorTargetDir, parameters);
+  await generateWithOptions(options, schema, schemaName);
+}
+
+module.exports = { generateTypesForAllMessagePayloads, generateTypesForSchema };
