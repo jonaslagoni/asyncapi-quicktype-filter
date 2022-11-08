@@ -92,6 +92,7 @@ function getDefaultRenderOptions(options, schemaName, jsonSchema) {
   // eslint-disable-next-line sonarjs/no-small-switch
   switch (options.quicktypeLanguage) {
   case SUPPORTED_LANGUAGES.csharp:
+  case SUPPORTED_LANGUAGES.cplusplus:
     //Each schema require custom namespace and not common since otherwise schema names will clash.
     if (!renderOptions.namespace) {
       renderOptions.namespace = `${pascalCase(schemaName)}NameSpace`;
